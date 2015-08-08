@@ -1,0 +1,42 @@
+#general
+1:root name
+2:
+
+#structural
+1:number of levels
+2:number of internal nodes (sub-directories)
+3:number of external nodes (files)
+4:bin level
+5:lib level
+6:classes level
+7:doc level
+7:include level
+8:number of sub-directories with only files
+9:number of sub-directories with only sub-directories
+10:number of sub-directories with files and sub-directories
+
+
+file distribution:
+0:
+1:
+2:
+3:
+4:
+
+directory distribution
+0:
+1:
+2:
+3:
+4:
+
+#statistical
+1:maximum number of file in a sub-directory
+2:maximum number of sub-directories in a sub-directory (one level)
+3:file type with maximum occurrence (code of file type)
+4:biggest file (code)
+5:size biggest file (Kb)
+6:smallest file (code)
+7:size smallest file (Kb)
+8:number of different file types
+9:total size installation
