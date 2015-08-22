@@ -17,6 +17,8 @@ public class NodeInfo extends DefaultMutableTreeNode implements Comparable{
 	String extension;
 	int codeFile;
 	
+	
+	
 	public NodeInfo(String name, long size, long mtime, long ctime, long uid, long gid){
 		this.name=name;
 		this.size=size;
@@ -34,6 +36,12 @@ public class NodeInfo extends DefaultMutableTreeNode implements Comparable{
 		this.isFile=isFile;
 	}
 	
+	public NodeInfo(String name, long size, boolean isFile){
+		this.name=name;
+		this.size=size;
+		this.isFile=isFile;
+	}
+	
 	public NodeInfo(String name){
 		this.name=name;
 	}
@@ -44,6 +52,15 @@ public class NodeInfo extends DefaultMutableTreeNode implements Comparable{
 		this.size=size;
 		this.mtime=mtime;
 		this.ctime=ctime;
+		this.isFile=isFile;
+		this.extension=extension;
+		this.codeFile=codeFile;
+	}
+	
+	public NodeInfo(String name, long size, boolean isFile, String extension, int codeFile) {
+		// TODO Auto-generated constructor stub
+		this.name=name;
+		this.size=size;
 		this.isFile=isFile;
 		this.extension=extension;
 		this.codeFile=codeFile;

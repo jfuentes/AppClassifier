@@ -1,0 +1,3 @@
+#Create a text file with the metadata from the last backup 
+
+avtar --id=root --ap=changeme --server=a4dpe-ad.asl.lab.emc.com --path=/clients/usenmalammd1c.corp.emc.com -tv --search-format > usenmalammd1c.txt 2>&1

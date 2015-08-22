@@ -1,0 +1,36 @@
+#Internet Explorer
+env,95
+exe,20
+zip,4
+mui,1
+propdesc,1
+class,1
+#Internet Explorer 2
+env,90
+hlp,15
+exe,13
+zip,4
+mui,1
+class,1
+#Internet Explorer 3
+env,120
+exe,16
+hlp,15
+zip,4
+mui,1
+class,1
+#Internet Explorer 4
+env,168
+exe,24
+hlp,21
+zip,4
+mui,1
+propdesc,1
+class,1
+#Internet Explorer 5
+env,120
+exe,16
+hlp,15
+zip,4
+mui,1
+class,1
