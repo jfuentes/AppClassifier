@@ -1,8 +1,6 @@
 package util;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Collection;
+
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -10,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
+
 
 public class Application{
 	public static final int NUM_FEATURES = 36;

@@ -2,11 +2,7 @@ package util;
 
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
-import dk.ange.octave.type.Octave;
 import dk.ange.octave.type.OctaveDouble;
-import dk.ange.octave.type.OctaveInt;
-import dk.ange.octave.type.OctaveString;
-import dk.ange.octave.type.matrix.DoubleMatrix;
 
 public class OctaveFunctions {
 	public static final String TRAINING_SET_FILENAME = "octave-files/dataTrainingSet.mat";

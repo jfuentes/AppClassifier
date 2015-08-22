@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -16,11 +15,7 @@ import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.learning.MomentumBackpropagation;
 import org.neuroph.util.TransferFunctionType;
 
-import dk.ange.octave.OctaveEngine;
-import dk.ange.octave.OctaveEngineFactory;
-import dk.ange.octave.type.Octave;
-import dk.ange.octave.type.OctaveDouble;
-import dk.ange.octave.type.OctaveString;
+
 import util.*;
 
 public class AppClassifier {
