@@ -11,7 +11,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 
 public class Application{
-	public static final int NUM_FEATURES = 36;
+	public static final int NUM_FEATURES = 37;
 	
 	private String name;
 	private DefaultMutableTreeNode root;
@@ -24,8 +24,8 @@ public class Application{
 	private boolean computedStatDirectories=false;
 	
 	//file and folder distribution by levels
-	private double fileDistribution[];
-	private double folderDistribution[];
+	private double [] fileDistribution;
+	private double [] folderDistribution;
 	private int divisor;
 	private int distributionSize=5;
 	
@@ -277,7 +277,7 @@ public class Application{
 		
 		for(int i=0; i<distributionSize; i++){
 			fileDistribution[i]=fileDistribution2[i]/totalFiles;
-			folderDistribution[i]=folderDistribution2[i]/totalFolders;
+			folderDistribution[i]=folderDistribution2[i]==0?0:(folderDistribution2[i]/totalFolders);
 		}
 		
 		/*
@@ -339,11 +339,11 @@ public class Application{
 		features[21] = rankingFileOcurrence[3]; //file type with maximum occurrence (code of file type) #4
 		features[22] = rankingFileOcurrence[4]; //file type with maximum occurrence (code of file type) #5
 
-		features[23] = rankingBySize[0].codeFile; //ranking largest files (code of file type) #1
-		features[24] = rankingBySize[1].codeFile; //ranking largest files (code of file type) #2
-		features[25] = rankingBySize[2].codeFile; //ranking largest files (code of file type) #3
-		features[26] = rankingBySize[3].codeFile; //ranking largest files (code of file type) #4
-		features[27] = rankingBySize[4].codeFile; //ranking largest files (code of file type) #5
+		features[23] = (rankingBySize.length>0?rankingBySize[0].codeFile:0); //ranking largest files (code of file type) #1
+		features[24] = (rankingBySize.length>1?rankingBySize[1].codeFile:0); //ranking largest files (code of file type) #2
+		features[25] = (rankingBySize.length>2?rankingBySize[2].codeFile:0); //ranking largest files (code of file type) #3
+		features[26] = (rankingBySize.length>3?rankingBySize[3].codeFile:0); //ranking largest files (code of file type) #4
+		features[27] = (rankingBySize.length>4?rankingBySize[4].codeFile:0); //ranking largest files (code of file type) #5
 		
 		features[28] = rankingBySize[0].size; //size biggest file (Kb)
 		
@@ -364,6 +364,9 @@ public class Application{
 		features[33] = folderPresence[2]; //classes
 		features[34] = folderPresence[3]; //doc
 		features[35] = folderPresence[4]; //include
+		
+		//name on unicode integer
+		features[36] = ((NodeInfo)this.root.getUserObject()).name.split("_")[1].hashCode();
 		
 		return features;
 	}

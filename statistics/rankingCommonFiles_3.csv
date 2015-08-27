@@ -1,4 +1,4 @@
-#Adobe Reader
+#Adobe
 exe,40
 dll,38
 bin,21
@@ -28,7 +28,7 @@ pak,1
 ini,1
 pdf,1
 api,1
-#Adobe Reader 2
+#Adobe
 exe,40
 dll,38
 bin,21
@@ -58,7 +58,7 @@ pak,1
 ini,1
 pdf,1
 api,1
-# Adobe Reader 3
+#Adobe
 exe,40
 dll,38
 bin,21
@@ -88,7 +88,7 @@ pak,1
 ini,1
 pdf,1
 api,1
-#Adobe Reader 4
+#Adobe
 dll,38
 exe,33
 diz,25
@@ -125,7 +125,7 @@ pak,1
 ini,1
 pdf,1
 api,1
-#Adobe Reader 5
+#Adobe
 dll,38
 exe,37
 bin,21

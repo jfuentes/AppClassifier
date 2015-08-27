@@ -1,4 +1,4 @@
-#Adobe Reader
+#Adobe
 /Adobe/Reader11.0/,180377366
 /Adobe/Reader11.0/Esl/,215416
 /Adobe/Reader11.0/Esl/AiodLite.dll,215416
@@ -231,7 +231,7 @@
 /Adobe/Reader11.0/Resource/TypeSupport/Unicode/Mappings/win/CP1258.TXT,9506
 /Adobe/Reader11.0/SetupFiles/,0
 /Adobe/Reader11.0/SetupFiles/{AC76BA86-7AD7-1033-7B44-AB0000000001}/,0
-#Adobe Reader 2
+#Adobe
 /Adobe/,180640016
 /Adobe/Reader11.0/,180640016
 /Adobe/Reader11.0/ReadMe.htm,16077
@@ -465,7 +465,7 @@
 /Adobe/Reader11.0/Resource/TypeSupport/Unicode/Mappings/win/CP1258.TXT,9506
 /Adobe/Reader11.0/SetupFiles/,0
 /Adobe/Reader11.0/SetupFiles/{AC76BA86-7AD7-1033-7B44-AB0000000001}/,0
-# Adobe Reader 3
+#Adobe
 /Adobe/Reader11.0/,180640016
 /Adobe/Reader11.0/Esl/,215416
 /Adobe/Reader11.0/Esl/AiodLite.dll,215416
@@ -698,7 +698,7 @@
 /Adobe/Reader11.0/Resource/TypeSupport/Unicode/Mappings/win/CP1258.TXT,9506
 /Adobe/Reader11.0/SetupFiles/,0
 /Adobe/Reader11.0/SetupFiles/{AC76BA86-7AD7-1033-7B44-AB0000000001}/,0
-#Adobe Reader 4
+#Adobe
 /Adobe/,115971440
 /Adobe/FlashPlayer/,56502
 /Adobe/FlashPlayer/AddIns/,56502
@@ -952,7 +952,7 @@
 /Adobe/Reader10.0/Resource/TypeSupport/Unicode/Mappings/win/CP1258.TXT,9506
 /Adobe/Reader10.0/SetupFiles/,0
 /Adobe/Reader10.0/SetupFiles/{AC76BA86-7AD7-1033-7B44-AA1000000001}/,0
-#Adobe Reader 5
+#Adobe
 /Adobe/Reader11.0/,121053483
 /Adobe/Reader11.0/Esl/,215264
 /Adobe/Reader11.0/Esl/AiodLite.dll,215264

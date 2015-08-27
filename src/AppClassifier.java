@@ -1,20 +1,24 @@
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import java.util.Scanner;
+
 
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
 import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.learning.MomentumBackpropagation;
 import org.neuroph.util.TransferFunctionType;
-
 
 import util.*;
 
@@ -23,9 +27,14 @@ public class AppClassifier {
 	public static final String CLASSES_DIRECTORY = "metadata-classes";
 	public static final String TEST_CASES_DIRECTORY = "test-cases";
 	public static final String STATISTICS_DIRECTORY = "statistics";
-	public static final int TRAINING_SET_SIZE = 65;
+	public static final String BACKUPS_DIRECTORY = "backups-metadata";
+	public static int TRAINING_SET_SIZE = 66;
 	
 	public static int NUMBER_OF_CLASSES = 0;
+	public static int NUMBER_HIDDEN_NODES = 24;
+	
+	public static final int FILE_DISTRIBUTION_STARTS = 6;
+	public static final int FOLDER_DISTRIBUTION_ENDS =15;
 	
 	
 	public static HashMap<String, Integer> fileCodes = new HashMap<String, Integer>();
@@ -178,16 +187,16 @@ public class AppClassifier {
 		        String inputFileName = "features/normalized_features"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv";
 		        
 		        // create MultiLayerPerceptron neural network
-		        neuralNet = new MultiLayerPerceptron(TransferFunctionType.SIGMOID,36, 24, 12);
+		        neuralNet = new MultiLayerPerceptron(TransferFunctionType.SIGMOID,Application.NUM_FEATURES, NUMBER_HIDDEN_NODES, NUMBER_OF_CLASSES);
 		        
 		        // set learning parameters
 		        MomentumBackpropagation learningRule = (MomentumBackpropagation) neuralNet.getLearningRule();
-		        //learningRule.setLearningRate(0.5);
-		        //learningRule.setMomentum(0.8);
-		        //learningRule.setMaxIterations(200);
+		        learningRule.setLearningRate(0.5);
+		        learningRule.setMomentum(0.8);
+		        learningRule.setMaxIterations(800);
 		        
 		        // create training set from file
-		        DataSet dataSet = DataSet.createFromFile(inputFileName, 36, 12, ",", false);
+		        DataSet dataSet = DataSet.createFromFile(inputFileName, Application.NUM_FEATURES, NUMBER_OF_CLASSES, ",", false);
 		       
 		        // train the network with training set
 		        System.out.println("Training neural network...");
@@ -225,6 +234,7 @@ public class AppClassifier {
 				do{
 					System.out.println("    1.- Extract features from a file");
 					System.out.println("    2.- Enter the features manually");
+					System.out.println("    3.- Analize a backup metadata file");
 					op = sc.nextInt();
 					switch(op){
 					case 1:
@@ -244,7 +254,7 @@ public class AppClassifier {
 						}
 
 						System.out.println("]");
-											
+						analizeFeaturesInput(neuralNet, testVector, classVector);					
 						break;
 					case 2:
 						System.out.print("Enter the set of features: ");
@@ -256,48 +266,20 @@ public class AppClassifier {
 						for(int i=0; i< featuresStrings.length; i++){
 							testVector[i]= Double.parseDouble(featuresStrings[i]);
 						}
+						
+						analizeFeaturesInput(neuralNet, testVector, classVector);
+						break;
+					
+					case 3:
+						System.out.print("Enter the file name: ");
+						String backupFile= sc.next();
+						analizeBackupMetadaFile(backupFile, neuralNet, classVector);
+						
 						break;
 					default: System.out.println("Invalid option");
 					}
-				}while(op!=1 & op!=2);
+				}while(op!=1 && op!=2 && op!=3);
 				
-				
-				
-				
-				//testVector = normalizeTestExample(testVector);
-				//testVector = featureStandardizationExample(testVector);
-				testVector = normalizeExample(testVector);
-				
-				DataSet testSet = new DataSet(Application.NUM_FEATURES, NUMBER_OF_CLASSES);
-				testSet.addRow(new DataSetRow(testVector, classVector));
-		        for(DataSetRow testSetRow : testSet.getRows()) {
-		            neuralNet.setInput(testSetRow.getInput());
-		            neuralNet.calculate();
-		            double[] networkOutput = neuralNet.getOutput();
-		            int index=-1;
-		            double max=0.7;
-		            for(int i=0; i<networkOutput.length;i++){
-		            	if(networkOutput[i]>max){
-		            		max=networkOutput[i];
-		            		index=i;
-		            	}
-		            }
-		            System.out.println();
-		            System.out.println(index==-1?"Answer: No class ":"Answer: Class "+(index+1));
-		            double [] input=testSetRow.getInput();
-		            System.out.print("  Input: [" );
-		            for (int i = 0; i < input.length; i++) { //show the input features
-						System.out.print(formatter.format(input[i])+" ");
-					}
-		            System.out.println("]");
-		            
-		            double [] output = networkOutput;
-		            System.out.print("  Output: [" );
-		            for (int i = 0; i < output.length; i++) { //show the input features
-						System.out.print(formatter.format(output[i])+"  ");
-					}
-		            System.out.println("]");
-		        }
 				break;
 				
 			case 6: 
@@ -337,14 +319,165 @@ public class AppClassifier {
 		sc.close();
 	}
 	
+	private static void analizeFeaturesInput(MultiLayerPerceptron neuralNet,
+			double[] testVector, double[] classVector) {
+		// TODO Auto-generated method stub
+		testVector = normalizeExample(testVector);
+		NumberFormat formatter = new DecimalFormat("#0.000");
+		DataSet testSet = new DataSet(Application.NUM_FEATURES, NUMBER_OF_CLASSES);
+		testSet.addRow(new DataSetRow(testVector, classVector));
+        for(DataSetRow testSetRow : testSet.getRows()) {
+            neuralNet.setInput(testSetRow.getInput());
+            neuralNet.calculate();
+            double[] networkOutput = neuralNet.getOutput();
+            int index=-1;
+            double max=0.9;
+            for(int i=0; i<networkOutput.length;i++){
+            	if(networkOutput[i]>max){
+            		max=networkOutput[i];
+            		index=i;
+            	}
+            }
+            System.out.println();
+            System.out.println(index==-1?"Answer: Class not found":"Answer: Class "+(index+1));
+            double [] input=testSetRow.getInput();
+            System.out.print("  Input: [" );
+            for (int i = 0; i < input.length; i++) { //show the input features
+				System.out.print(formatter.format(input[i])+" ");
+			}
+            System.out.println("]");
+            
+            double [] output = networkOutput;
+            System.out.print("  Output: [" );
+            for (int i = 0; i < output.length; i++) { //show the input features
+				System.out.print(formatter.format(output[i])+"  ");
+			}
+            System.out.println("]");
+        }
+	}
+
+	private static void analizeBackupMetadaFile(String backupFile, MultiLayerPerceptron neuralNet, double [] classVector) {
+		// TODO Auto-generated method stub
+		boolean [] classes = new boolean[NUMBER_OF_CLASSES];
+		try (BufferedReader br = new BufferedReader(new FileReader(BACKUPS_DIRECTORY+"/"+backupFile)))
+		{
+
+			String sCurrentLine = null, currentProgram, fileName;
+			ArrayList<String> files = new ArrayList<String>();
+			ArrayList<String> fileNames = new ArrayList<String>();
+			
+			boolean alreadyRead=false;
+			
+			while (alreadyRead || ((sCurrentLine = br.readLine()) != null && sCurrentLine.length()!=0) ) {
+				if(sCurrentLine.startsWith("C:/ProgramFiles")){
+					String []  tokens = sCurrentLine.split("/");
+					if(tokens.length>3){
+						currentProgram=tokens[2];
+						
+						try {
+							fileName = BACKUPS_DIRECTORY+"/"+backupFile+"_"+tokens[2]+".txt";
+							files.add(fileName);
+							fileNames.add(tokens[2]);
+							PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+							writer.println("#"+currentProgram);
+							do{
+								writer.println(sCurrentLine.startsWith("C:/ProgramFiles(x86)")?sCurrentLine.substring("C:/ProgramFiles(x86)".length()): sCurrentLine.substring("C:/ProgramFiles".length()));
+							}while ((sCurrentLine = br.readLine()) != null && sCurrentLine.length()!=0 && (tokens = sCurrentLine.split("/")).length>3 && currentProgram.equals(tokens[2]));
+							writer.close();
+							
+							alreadyRead =true;
+							continue;
+							
+							
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				alreadyRead=false;
+				
+				
+			}
+			
+			br.close();
+			
+			double [] testVector = null;
+			NumberFormat formatter = new DecimalFormat("#0.000");
+			for(int i=0; i<files.size(); i++){
+				AppClass appClass = new AppClass(fileCodes, codeFiles, files.get(i), fileNames.get(i));
+				appClass.createApplicationsFromFile();
+				//System.out.println("Extracting features from "+fileNames.get(i)+" ...");
+				//appClass.printApplicationStatistics();
+				//appClass.setVisible(true);
+				testVector = appClass.getFeaturesFirstApplication();
+				
+				//System.out.print("Features: [");
+				//for (int j = 0; j < testVector.length; j++) {
+				//	System.out.print(formatter.format(testVector[j])+" ");
+				//}
+
+				//System.out.println("]");
+			
+			
+			testVector = normalizeExample(testVector);
+			
+			DataSet testSet = new DataSet(Application.NUM_FEATURES, NUMBER_OF_CLASSES);
+			testSet.addRow(new DataSetRow(testVector, classVector));
+	        for(DataSetRow testSetRow : testSet.getRows()) {
+	            neuralNet.setInput(testSetRow.getInput());
+	            neuralNet.calculate();
+	            double[] networkOutput = neuralNet.getOutput();
+	            int index=-1;
+	            double max=0.9;
+	            for(int j=0; j<networkOutput.length;j++){
+	            	if(networkOutput[j]>max){
+	            		max=networkOutput[j];
+	            		index=j;
+	            	}
+	            }
+	            //System.out.println();
+	            //System.out.println(index==-1?"Answer: Class not found ":"Answer: Class "+(index+1));
+	            //double [] input=testSetRow.getInput();
+	            //System.out.print("  Input: [" );
+	            //for (int i = 0; i < input.length; i++) { //show the input features
+				//	System.out.print(formatter.format(input[i])+" ");
+				//}
+	            //System.out.println("]");
+	            
+	            //double [] output = networkOutput;
+	            //System.out.print("  Output: [" );
+	            //for (int i = 0; i < output.length; i++) { //show the input features
+				//	System.out.print(formatter.format(output[i])+"  ");
+				//}
+	            //System.out.println("]");
+	            if(index!=-1 && !classes[index]){
+	            	System.out.println("Application found: Class "+(index+1));
+	            	classes[index]=true;
+	            }
+	            //System.out.println();
+	        }
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		
+	}
+
 	private static double[] normalizeExample(double[] example){
 		for (int i = 0; i < Application.NUM_FEATURES; i++) {
-			if(example[i]<maxMinFeatureValues[0][i])
-				example[i]=0;
-			else if(example[i]>maxMinFeatureValues[1][i])
-				example[i]=1;
-			else
-				example[i] =(maxMinFeatureValues[1][i]-maxMinFeatureValues[0][i]==0)?0: (example[i]-maxMinFeatureValues[0][i])/(maxMinFeatureValues[1][i]-maxMinFeatureValues[0][i]);
+			if(i<FILE_DISTRIBUTION_STARTS || i>FOLDER_DISTRIBUTION_ENDS){ //do not normalize file and folder distribution
+				if(example[i]<maxMinFeatureValues[0][i])
+					example[i]=0;
+				else if(example[i]>maxMinFeatureValues[1][i])
+					example[i]=1;
+				else
+					example[i] =(maxMinFeatureValues[1][i]-maxMinFeatureValues[0][i]==0)?0: (example[i]-maxMinFeatureValues[0][i])/(maxMinFeatureValues[1][i]-maxMinFeatureValues[0][i]);
+			}
 		}
 		return example;
 	}
@@ -367,19 +500,24 @@ public class AppClassifier {
 		double [] normalizedDataSet = new double[TRAINING_SET_SIZE*Application.NUM_FEATURES];
 		
 		for(int col=0; col< Application.NUM_FEATURES; col++){
-			double max=0, min=10000000;
-			for(int i=col; i<trainingSet.length; i+=Application.NUM_FEATURES){
-				if(trainingSet[i]>max)
-					max=trainingSet[i];
-				if(trainingSet[i]<min)
-					min=trainingSet[i];
-			}
-			//System.out.println(col+": max "+max+"  min "+min);
-			maxMinFeatureValues[0][col]=min;
-			maxMinFeatureValues[1][col]=max;
-			for(int i=col; i<trainingSet.length; i+=Application.NUM_FEATURES){
-				normalizedDataSet[i] = (max-min)==0?0:((trainingSet[i]-min)/(max-min));
-			}
+			if(col<FILE_DISTRIBUTION_STARTS || col>FOLDER_DISTRIBUTION_ENDS){ //do not normalize file and folder distribution
+				double max=0, min=10000000;
+				for(int i=col; i<trainingSet.length; i+=Application.NUM_FEATURES){
+					if(trainingSet[i]>max)
+						max=trainingSet[i];
+					if(trainingSet[i]<min)
+						min=trainingSet[i];
+				}
+				//System.out.println(col+": max "+max+"  min "+min);
+				maxMinFeatureValues[0][col]=min;
+				maxMinFeatureValues[1][col]=max;
+				for(int i=col; i<trainingSet.length; i+=Application.NUM_FEATURES){
+					normalizedDataSet[i] = (max-min)==0?0:((trainingSet[i]-min)/(max-min));
+				}
+			}else
+				for(int i=col; i<trainingSet.length; i+=Application.NUM_FEATURES){
+					normalizedDataSet[i] = trainingSet[i];
+				}
 		}
 		
 		return normalizedDataSet;

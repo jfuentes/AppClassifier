@@ -219,7 +219,7 @@ public class AppClass{
 				}
 				
 			}
-			if(app!=null){
+			if(app!=null && root.getChildCount()>0){
 				app.setRoot((DefaultMutableTreeNode)root.getLastChild());
 				app.setTotalNodes(totalNodes);
 				app.setNumDiffFileCodes(fileStatistics.size());

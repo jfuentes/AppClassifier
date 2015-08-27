@@ -44,7 +44,7 @@
 /WinZip/WZ_extra.exe, 393972, 1149028302, 1149028302, ,
 /WinZip/WZ_extra.zip, 386652, 1149028302, 1149028302, ,
 /WinZip/, 1228, 1337738540, 1337738540, ,
-#WinZip 2
+#WinZip
 /WinZip/,6520752
 /WinZip/EXAMPLE.ZIP,1753
 /WinZip/extra/,564856
@@ -90,7 +90,7 @@
 /WinZip/WZVINFO.DLL,83456
 /WinZip/WZWIZARD.CHM,78875
 /WinZip/WZZPMAIL.DLL,217088
-#Winzip 3
+#WinZip
 /WinZip/,6520752
 /WinZip/EXAMPLE.ZIP,1753
 /WinZip/extract.gif,3719
@@ -136,7 +136,7 @@
 /WinZip/extra/LHA.EXE,35762
 /WinZip/WZ_extra/,206
 /WinZip/WZ_extra/up.gif,206
-#Winzip 4
+#WinZip
 /WinZip/,6520752
 /WinZip/EXAMPLE.ZIP,1753
 /WinZip/extra/,564856
@@ -182,7 +182,7 @@
 /WinZip/WZVINFO.DLL,83456
 /WinZip/WZWIZARD.CHM,78875
 /WinZip/WZZPMAIL.DLL,217088
-#Winzip 5
+#WinZip
 /WinZip/,6520752
 /WinZip/EXAMPLE.ZIP,1753
 /WinZip/extra/,564856
@@ -228,7 +228,7 @@
 /WinZip/WZVINFO.DLL,83456
 /WinZip/WZWIZARD.CHM,78875
 /WinZip/WZZPMAIL.DLL,217088
-#Winzip 6
+#WinZip
 /WinZip/,6520752
 /WinZip/EXAMPLE.ZIP,1753
 /WinZip/extra/,564856
