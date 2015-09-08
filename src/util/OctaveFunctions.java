@@ -8,6 +8,8 @@ public class OctaveFunctions {
 	public static final String TRAINING_SET_FILENAME = "octave-files/dataTrainingSet.mat";
 	public static final String FINAL_TRAINING_SET_FILENAME = "octave-files/finalDataTrainingSet.mat";
 	
+	public static final String WEIGTHS_HIDDEN_LAYER = "octave-files/weightsHiddenLayer.mat";
+	
 	public static final String REDUCTED_FEATURES = "octave-files/reductedFeatures.mat";
 	
 	
@@ -101,102 +103,43 @@ public class OctaveFunctions {
 		octave.eval("save -binary "+REDUCTED_FEATURES+" X_red K;");
 		octave.close();
 		
-		/*
+	}
+	
+	/*
+	 * In order to use this method, the hidden layer weights need to be computed previously (learning process)
+	 */
+	public static double [] classifyWithNeuralNet(double[] X){
 		
-		%  Before running PCA, it is important to first normalize X
-		[X_norm, mu, sigma] = featureNormalize(X);
+		OctaveEngine octave = new OctaveEngineFactory().getScriptEngine();
 		
-		function [X_norm, mu, sigma] = featureNormalize(X)
-				%FEATURENORMALIZE Normalizes the features in X 
-				%   FEATURENORMALIZE(X) returns a normalized version of X where
-				%   the mean value of each feature is 0 and the standard deviation
-				%   is 1. This is often a good preprocessing step to do when
-				%   working with learning algorithms.
-
-				mu = mean(X);
-				X_norm = bsxfun(@minus, X, mu);
-
-				sigma = std(X_norm);
-				X_norm = bsxfun(@rdivide, X_norm, sigma);
-
-
-				% ============================================================
-
-				end
-				
+		OctaveDouble oX = new OctaveDouble(X, X.length, 1);
+		octave.put("X", oX);
 		
-				%  Run PCA
-				[U, S] = pca(X_norm);
-				
-				
-				function [U, S] = pca(X)
-						%PCA Run principal component analysis on the dataset X
-						%   [U, S, X] = pca(X) computes eigenvectors of the covariance matrix of X
-						%   Returns the eigenvectors U, the eigenvalues (on diagonal) in S
-						%
+		octave.eval("load "+WEIGTHS_HIDDEN_LAYER+";");
+		
+		
+		octave.eval("num_labels = size(Theta2, 1);");
 
-						% Useful values
-						[m, n] = size(X);
+		octave.eval("p = zeros(size(X, 1), 1);");
 
-						% You need to return the following variables correctly.
-						U = zeros(n);
-						S = zeros(n);
+		octave.eval("a1 = [ones(size(X, 1), 1) X];");
 
-						% ====================== YOUR CODE HERE ======================
-						% Instructions: You should first compute the covariance matrix. Then, you
-						%               should use the "svd" function to compute the eigenvectors
-						%               and eigenvalues of the covariance matrix.
-						%
-						% Note: When computing the covariance matrix, remember to divide by m (the
-						%       number of examples).
-						%
+		octave.eval("z2 = Theta1*a1';");
+		octave.eval("a2 = 1.0 ./ (1.0 + exp(-z2));"); //sigmoid function
 
-						sigma = (X'*X)./m;
+		octave.eval("a2 = [ones(1, size(a2, 2)); a2];");
+		
+		octave.eval("z3 = Theta2*a2;");
+		octave.eval("a3 = 1.0 ./ (1.0 + exp(-z3));");
 
-						[U, S, V] = svd(sigma);
-
-
-
-
-
-						% =========================================================================
-
-						end
-						
-						
-						
-						%  Project the data onto K = 1 dimension
-						K = 1;
-						Z = projectData(X_norm, U, K);
-						
-						
-						function Z = projectData(X, U, K)
-								%PROJECTDATA Computes the reduced data representation when projecting only
-								%on to the top k eigenvectors
-								%   Z = projectData(X, U, K) computes the projection of
-								%   the normalized inputs X into the reduced dimensional space spanned by
-								%   the first K columns of U. It returns the projected examples in Z.
-								%
-
-								% You need to return the following variables correctly.
-								Z = zeros(size(X, 1), K);
-
-								% ====================== YOUR CODE HERE ======================
-								% Instructions: Compute the projection of the data using only the top K
-								%               eigenvectors in U (first K columns).
-								%               For the i-th example X(i,:), the projection on to the k-th
-								%               eigenvector is given as follows:
-								%                    x = X(i, :)';
-								%                    projection_k = x' * U(:, k);
-								%
-
-								Z = X * U(:, 1:K);
-
-
-								% =============================================================
-
-								end
-								*/
+		octave.eval("[values, p] = max(a3', [], 2);");
+		
+		OctaveDouble result = octave.get(OctaveDouble.class, "p");
+		double [] classResult = result.getData();
+		
+		octave.close();
+		
+		return classResult;
 	}
 
 	

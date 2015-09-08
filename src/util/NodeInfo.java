@@ -7,15 +7,15 @@ public class NodeInfo extends DefaultMutableTreeNode implements Comparable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String name;
-	long size; // file size is on Kb
+	public String name;
+	public long size; // file size is on Kb
 	long mtime;
 	long ctime;
 	long uid;
 	long gid;
 	boolean isFile;
-	String extension;
-	int codeFile;
+	public String extension;
+	public int codeFile;
 	
 	
 	

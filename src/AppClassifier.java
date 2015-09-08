@@ -10,9 +10,16 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
+import net.sf.javaml.core.Dataset;
+import net.sf.javaml.distance.PearsonCorrelationCoefficient;
+import net.sf.javaml.featureselection.ensemble.LinearRankingEnsemble;
+import net.sf.javaml.featureselection.ranking.RecursiveFeatureEliminationSVM;
+import net.sf.javaml.featureselection.scoring.GainRatio;
+import net.sf.javaml.featureselection.subset.GreedyForwardSelection;
+import net.sf.javaml.tools.data.FileHandler;
 
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
@@ -28,17 +35,20 @@ public class AppClassifier {
 	public static final String TEST_CASES_DIRECTORY = "test-cases";
 	public static final String STATISTICS_DIRECTORY = "statistics";
 	public static final String BACKUPS_DIRECTORY = "backups-metadata";
-	public static int TRAINING_SET_SIZE = 66;
+	public static final String EXTENSION_DIRECTORY = "extensions";
+	
+	public static int TRAINING_SET_SIZE = 71;
 	
 	public static int NUMBER_OF_CLASSES = 0;
 	public static int NUMBER_HIDDEN_NODES = 24;
+	
+	public static int NUMBER_EXTENSION_CLASSES;
 	
 	public static final int FILE_DISTRIBUTION_STARTS = 6;
 	public static final int FOLDER_DISTRIBUTION_ENDS =15;
 	
 	
 	public static HashMap<String, Integer> fileCodes = new HashMap<String, Integer>();
-	private static HashMap<Integer, String> codeFiles = new HashMap<Integer, String>();
 	
 	public static double [][] maxMinFeatureValues;
 	
@@ -46,6 +56,8 @@ public class AppClassifier {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+		generateExtensionDictionary();
 		
 		ArrayList<AppClass> classes = new ArrayList<AppClass>();
 		
@@ -64,11 +76,12 @@ public class AppClassifier {
 			System.out.println();
 			System.out.println("1.- Construct training set from metadata files");
 			System.out.println("2.- Normalize and Export features to CSV file");
-			System.out.println("3.- Apply PCA for dimensionality reduction");
-			System.out.println("4.- Train Neural Network");
-			System.out.println("5.- Classify Application with NN");
-			System.out.println("6.- Generate statistics files");
-			System.out.println("7.- Exit");
+			System.out.println("3.- Fature selection");
+			System.out.println("4.- Apply PCA for dimensionality reduction");
+			System.out.println("5.- Train Neural Network");
+			System.out.println("6.- Classify Application with NN");
+			System.out.println("7.- Generate statistics files");
+			System.out.println("8.- Exit");
 			System.out.print("\nOption: ");
 			option = sc.nextInt();
 			System.out.println();
@@ -88,7 +101,7 @@ public class AppClassifier {
 				int posX=0;
 				
 				for(int i=0; i<fileNames.length; i++){
-					AppClass appClass = new AppClass(fileCodes, codeFiles, CLASSES_DIRECTORY+"/"+fileNames[i], fileNames[i]);
+					AppClass appClass = new AppClass(fileCodes, CLASSES_DIRECTORY+"/"+fileNames[i], fileNames[i]);
 					appClass.createApplicationsFromFile();
 					System.out.println("Features from "+fileNames[i]+" (class "+(i+1) +") extracted:");
 					//appClass.printApplicationStatistics();
@@ -126,6 +139,7 @@ public class AppClassifier {
 					//Xnorm = featureStandardization(X);
 					PrintWriter writer = new PrintWriter("features/features"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv", "UTF-8");
 					PrintWriter writer2 = new PrintWriter("features/normalized_features"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv", "UTF-8");
+					PrintWriter writer3 = new PrintWriter("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv", "UTF-8");
 					int cont=0,i=0;
 					while(i<X.length){
 						String s="", s2="";
@@ -137,20 +151,30 @@ public class AppClassifier {
 						
 						//int [] arrayY = new int[Y.length];
 						//arrayY[(int) Y[cont]-1]=1;
+						writer3.println(s2+"class"+Y[cont]);
+						
 						
 						for(int j=0; j<NUMBER_OF_CLASSES; j++){
-							s+=j==((int)Y[cont]-1)?"1.00"+",":"0.00"+",";
-							s2+=j==((int)Y[cont]-1)?"1.00"+",":"0.00"+",";
+							if(j==((int)Y[cont]-1)){
+								s+="1.00"+",";
+								s2+="1.00"+",";
+							}else{
+								s+="0.00"+",";
+								s2+="0.00"+",";
+							}
+							
+							
 						}
 						
 						cont++;
 						
 						writer.println(s);
 						writer2.println(s2);
+						
 					}
 					writer.close();
 					writer2.close();
-					
+					writer3.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -165,6 +189,114 @@ public class AppClassifier {
 				break;
 				
 			case 3:
+				int op=0;
+				do{
+					System.out.println("1.- Feature scoring");
+					System.out.println("2.- Feature ranking");
+					System.out.println("3.- Feature subset selection");
+					System.out.println("4.- Ensemble feature ranking");
+					System.out.println("5.- Weka attribute selection");
+					op = sc.nextInt();
+				}while(op<1 || op>5);
+				
+				switch(op){
+				case 1:
+					/* Load the iris data set */
+					Dataset data;
+					try {
+						data = FileHandler.loadDataset(new File("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv"), Application.NUM_FEATURES, ",");
+					
+					/* Create a feature scoring algorithm */
+					GainRatio ga = new GainRatio();
+					/* Apply the algorithm to the data set */
+					ga.build(data);
+					/* Print out the score of each attribute */
+					for (int i = 0; i < ga.noAttributes(); i++)
+					    System.out.println("feature "+i+": "+ga.score(i));
+					
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					break;
+				case 2:
+					try {
+					/* Load the iris data set */
+			        data = FileHandler.loadDataset(new File("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv"), Application.NUM_FEATURES, ",");
+			        /* Create a feature ranking algorithm */
+			        RecursiveFeatureEliminationSVM svmrfe = new RecursiveFeatureEliminationSVM(0.2);
+			        /* Apply the algorithm to the data set */
+			        svmrfe.build(data);
+			        /* Print out the rank of each attribute */
+			        for (int i = 0; i < svmrfe.noAttributes(); i++)
+			            System.out.println("feature "+i+": "+svmrfe.rank(i));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					break;
+				case 3:
+					try {
+			        data = FileHandler.loadDataset(new File("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv"), Application.NUM_FEATURES, ",");
+			        /*
+			         * Construct a greedy forward subset selector that will use the Pearson
+			         * correlation to determine the relation between each attribute and the
+			         * class label. The first parameter indicates that only one, i.e. 'the
+			         * best' attribute will be selected.
+			         */
+			        GreedyForwardSelection ga = new GreedyForwardSelection(15, new PearsonCorrelationCoefficient());
+			        /* Apply the algorithm to the data set */
+			        ga.build(data);
+			        /* Print out the attribute that has been selected */
+			        System.out.println(ga.selectedAttributes());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					break;
+				case 4:
+					try {
+				    data = FileHandler.loadDataset(new File("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv"), Application.NUM_FEATURES, ",");
+				        
+				    /* Create a feature ranking algorithm */
+			        RecursiveFeatureEliminationSVM[] svmrfes = new RecursiveFeatureEliminationSVM[10];
+			        for (int i = 0; i < svmrfes.length; i++)
+			            svmrfes[i] = new RecursiveFeatureEliminationSVM(0.2);
+			        LinearRankingEnsemble ensemble = new LinearRankingEnsemble(svmrfes);
+			        /* Build the ensemble */
+			        ensemble.build(data);
+			        /* Print out the rank of each attribute */
+			        for (int i = 0; i < ensemble.noAttributes(); i++)
+			            System.out.println("feature "+i+": "+ensemble.rank(i));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+					break;
+				case 5:
+					try {
+				        data = FileHandler.loadDataset(new File("features/normalized_features_X_"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv"), Application.NUM_FEATURES, ",");
+				        
+					/* Create a feature ranking algorithm */
+			        RecursiveFeatureEliminationSVM[] svmrfes = new RecursiveFeatureEliminationSVM[10];
+			        for (int i = 0; i < svmrfes.length; i++)
+			            svmrfes[i] = new RecursiveFeatureEliminationSVM(0.2);
+			        LinearRankingEnsemble ensemble = new LinearRankingEnsemble(svmrfes);
+			        /* Build the ensemble */
+			        ensemble.build(data);
+			        /* Print out the rank of each attribute */
+			        for (int i = 0; i < ensemble.noAttributes(); i++)
+			            System.out.println("feature "+i+": "+ensemble.rank(i));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+					break;
+				}
+				
+				break;
+				
+			case 4:
 				OctaveFunctions.saveTrainingSet(X, Y, TRAINING_SET_SIZE, Application.NUM_FEATURES);
 				System.out.println("The current number of features is "+Application.NUM_FEATURES);
 				System.out.print("Enter the new number of features: ");
@@ -182,7 +314,7 @@ public class AppClassifier {
 				}
 				break;
 				
-			case 4:
+			case 5:
 				// get the path to file with data
 		        String inputFileName = "features/normalized_features"+AppClassifier.TRAINING_SET_SIZE+"x"+Application.NUM_FEATURES+".csv";
 		        
@@ -226,8 +358,8 @@ public class AppClassifier {
 		        */
 				break;
 				
-			case 5:
-				int op=0;
+			case 6:
+				op=0;
 				double [] testVector = new double[Application.NUM_FEATURES];
 				double [] classVector = new double[NUMBER_OF_CLASSES];
 				classVector[1]=1;
@@ -241,7 +373,7 @@ public class AppClassifier {
 						System.out.print("Enter the file name: ");
 						String metaFile= sc.next();
 						
-						AppClass appClass = new AppClass(fileCodes, codeFiles, TEST_CASES_DIRECTORY+"/"+metaFile, metaFile);
+						AppClass appClass = new AppClass(fileCodes, TEST_CASES_DIRECTORY+"/"+metaFile, metaFile);
 						appClass.createApplicationsFromFile();
 						System.out.println("Extracting features from "+metaFile+" ...\n");
 						//appClass.printApplicationStatistics();
@@ -282,7 +414,7 @@ public class AppClassifier {
 				
 				break;
 				
-			case 6: 
+			case 7: 
 				for(AppClass appClass : classes){
 					//statistics for most common files
 					try {
@@ -310,15 +442,49 @@ public class AppClassifier {
 					}
 				}
 				break;
-			case 7:
+			case 8:
 				break;
 				
 			default: System.out.println("Invalid option");
 			}
-		}while(option!=7);
+		}while(option!=8);
 		sc.close();
 	}
 	
+	private static void generateExtensionDictionary() {
+		// TODO Auto-generated method stub
+		int extensionCategories=0;	
+		try (BufferedReader br = new BufferedReader(new FileReader(EXTENSION_DIRECTORY+"/ExtensionCategories.txt")))
+		{
+		
+			String sCurrentLine, extension;
+			
+			
+			while ((sCurrentLine = br.readLine()) != null && sCurrentLine.length()>0) {
+				StringTokenizer tkz = new StringTokenizer(sCurrentLine, ":");
+				
+				try (BufferedReader br2 = new BufferedReader(new FileReader(EXTENSION_DIRECTORY+"/"+tkz.nextToken())))
+				{
+					while ((extension = br2.readLine()) != null && extension.length()>0) {
+						fileCodes.put(extension.trim().toLowerCase(), extensionCategories);
+					}
+					br2.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				extensionCategories++;
+				
+				
+			}
+			br.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		NUMBER_EXTENSION_CLASSES = extensionCategories;
+
+	}
+
 	private static void analizeFeaturesInput(MultiLayerPerceptron neuralNet,
 			double[] testVector, double[] classVector) {
 		// TODO Auto-generated method stub
@@ -408,19 +574,19 @@ public class AppClassifier {
 			double [] testVector = null;
 			NumberFormat formatter = new DecimalFormat("#0.000");
 			for(int i=0; i<files.size(); i++){
-				AppClass appClass = new AppClass(fileCodes, codeFiles, files.get(i), fileNames.get(i));
+				AppClass appClass = new AppClass(fileCodes, files.get(i), fileNames.get(i));
 				appClass.createApplicationsFromFile();
-				//System.out.println("Extracting features from "+fileNames.get(i)+" ...");
+				System.out.println("Extracting features from "+fileNames.get(i)+" ...");
 				//appClass.printApplicationStatistics();
 				//appClass.setVisible(true);
 				testVector = appClass.getFeaturesFirstApplication();
 				
-				//System.out.print("Features: [");
-				//for (int j = 0; j < testVector.length; j++) {
-				//	System.out.print(formatter.format(testVector[j])+" ");
-				//}
+				System.out.print("Features: [");
+				for (int j = 0; j < testVector.length; j++) {
+					System.out.print(formatter.format(testVector[j])+" ");
+				}
 
-				//System.out.println("]");
+				System.out.println("]");
 			
 			
 			testVector = normalizeExample(testVector);
@@ -439,26 +605,26 @@ public class AppClassifier {
 	            		index=j;
 	            	}
 	            }
-	            //System.out.println();
-	            //System.out.println(index==-1?"Answer: Class not found ":"Answer: Class "+(index+1));
-	            //double [] input=testSetRow.getInput();
-	            //System.out.print("  Input: [" );
-	            //for (int i = 0; i < input.length; i++) { //show the input features
-				//	System.out.print(formatter.format(input[i])+" ");
-				//}
-	            //System.out.println("]");
+	            System.out.println();
+	            System.out.println(index==-1?"Answer: Class not found ":"Answer: Class "+(index+1));
+	            double [] input=testSetRow.getInput();
+	            System.out.print("  Input: [" );
+	            for (int m = 0; m < input.length; m++) { //show the input features
+					System.out.print(formatter.format(input[m])+" ");
+				}
+	            System.out.println("]");
 	            
-	            //double [] output = networkOutput;
-	            //System.out.print("  Output: [" );
-	            //for (int i = 0; i < output.length; i++) { //show the input features
-				//	System.out.print(formatter.format(output[i])+"  ");
-				//}
-	            //System.out.println("]");
+	            double [] output = networkOutput;
+	            System.out.print("  Output: [" );
+	            for (int m = 0; m < output.length; m++) { //show the input features
+					System.out.print(formatter.format(output[m])+"  ");
+				}
+	            System.out.println("]");
 	            if(index!=-1 && !classes[index]){
 	            	System.out.println("Application found: Class "+(index+1));
 	            	classes[index]=true;
 	            }
-	            //System.out.println();
+	            System.out.println();
 	        }
 			}
 
