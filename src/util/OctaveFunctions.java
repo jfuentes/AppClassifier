@@ -1,3 +1,7 @@
+/*
+ * This class is used as a utility to call Octave functions
+ */
+
 package util;
 
 import dk.ange.octave.OctaveEngine;
@@ -74,8 +78,6 @@ public class OctaveFunctions {
 		OctaveEngine octave = new OctaveEngineFactory().getScriptEngine();
 		octave.eval("load "+TRAINING_SET_FILENAME+";");
 		
-		//OctaveInt oK = new OctaveInt(KK, 1, 1);
-		//octave.put("K", oK);
 		octave.eval("K=12;");
 		
 		//featureNormalize

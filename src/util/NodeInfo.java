@@ -1,11 +1,15 @@
+
+/*
+ * This class represents the information about each node of the tree
+ */
+
+
 package util;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class NodeInfo extends DefaultMutableTreeNode implements Comparable{
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 	public String name;
 	public long size; // file size is on Kb

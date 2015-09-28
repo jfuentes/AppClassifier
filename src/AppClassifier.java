@@ -1,4 +1,24 @@
 
+/*
+ * Author: Joel Fuentes
+ * 09/14/2015
+ * 
+ * For more detail see article "Detecting applications from backup metadata using Neural Networks"
+ * There are two ML libraries that can be used with this program:
+ * - Octave (Interfaz to call octave functions)
+ * - Neuroph
+ * 
+ * This current version is runnig with Neuroph, which has shown better performance.
+ * 
+ */
+
+
+/*
+ * Important: If you want to add more training examples and classes, the following constants must be changed:
+ * - TRAINING_SET_SIZE (class AppClassifier)
+ * - NUM_FEATURES (class Application). You will also need to modify the function getFeatureVector() to add your new feature.
+ */
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,7 +47,7 @@ import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.learning.MomentumBackpropagation;
 import org.neuroph.util.TransferFunctionType;
 
-import util.*;
+import util.OctaveFunctions;
 
 public class AppClassifier {
 	
@@ -55,14 +75,14 @@ public class AppClassifier {
 	public static double [] meanFeatures;
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
+
+		//generate extension categories
 		generateExtensionDictionary();
 		
 		ArrayList<AppClass> classes = new ArrayList<AppClass>();
 		
 		double [] Y = new double[TRAINING_SET_SIZE];
-		double [] X = new double[TRAINING_SET_SIZE*Application.NUM_FEATURES];
+		double [] X = new double[TRAINING_SET_SIZE*Application.NUM_FEATURES]; // original dataset
 		double [] Xnorm = null; //normalized dataset
 		
 		int option;
@@ -91,8 +111,6 @@ public class AppClassifier {
 				System.out.println("Each metadata file represents a class with different version of one application");
 				System.out.println();
 				String[] fileNames = getMetadataFiles();
-				//Arrays.sort(fileNames);
-				
 				
 				NUMBER_OF_CLASSES=fileNames.length;
 
@@ -104,8 +122,6 @@ public class AppClassifier {
 					AppClass appClass = new AppClass(fileCodes, CLASSES_DIRECTORY+"/"+fileNames[i], fileNames[i]);
 					appClass.createApplicationsFromFile();
 					System.out.println("Features from "+fileNames[i]+" (class "+(i+1) +") extracted:");
-					//appClass.printApplicationStatistics();
-					//appClass.setVisible(true);
 					double [][] trainingSet = appClass.getFeaturesPerApplication();
 					
 					
@@ -576,17 +592,17 @@ public class AppClassifier {
 			for(int i=0; i<files.size(); i++){
 				AppClass appClass = new AppClass(fileCodes, files.get(i), fileNames.get(i));
 				appClass.createApplicationsFromFile();
-				System.out.println("Extracting features from "+fileNames.get(i)+" ...");
+				//System.out.println("Extracting features from "+fileNames.get(i)+" ...");
 				//appClass.printApplicationStatistics();
 				//appClass.setVisible(true);
 				testVector = appClass.getFeaturesFirstApplication();
 				
-				System.out.print("Features: [");
-				for (int j = 0; j < testVector.length; j++) {
-					System.out.print(formatter.format(testVector[j])+" ");
-				}
+				//System.out.print("Features: [");
+				//for (int j = 0; j < testVector.length; j++) {
+				//	System.out.print(formatter.format(testVector[j])+" ");
+				//}
 
-				System.out.println("]");
+				//System.out.println("]");
 			
 			
 			testVector = normalizeExample(testVector);
@@ -605,26 +621,26 @@ public class AppClassifier {
 	            		index=j;
 	            	}
 	            }
-	            System.out.println();
-	            System.out.println(index==-1?"Answer: Class not found ":"Answer: Class "+(index+1));
-	            double [] input=testSetRow.getInput();
-	            System.out.print("  Input: [" );
-	            for (int m = 0; m < input.length; m++) { //show the input features
-					System.out.print(formatter.format(input[m])+" ");
-				}
-	            System.out.println("]");
+	            //System.out.println();
+	            //System.out.println(index==-1?"Answer: Class not found ":"Answer: Class "+(index+1));
+	            //double [] input=testSetRow.getInput();
+	            //System.out.print("  Input: [" );
+	            //for (int m = 0; m < input.length; m++) { //show the input features
+				//	System.out.print(formatter.format(input[m])+" ");
+				//}
+	            //System.out.println("]");
 	            
-	            double [] output = networkOutput;
-	            System.out.print("  Output: [" );
-	            for (int m = 0; m < output.length; m++) { //show the input features
-					System.out.print(formatter.format(output[m])+"  ");
-				}
-	            System.out.println("]");
+	            //double [] output = networkOutput;
+	            //System.out.print("  Output: [" );
+	            //for (int m = 0; m < output.length; m++) { //show the input features
+				//	System.out.print(formatter.format(output[m])+"  ");
+				//}
+	            //System.out.println("]");
 	            if(index!=-1 && !classes[index]){
 	            	System.out.println("Application found: Class "+(index+1));
 	            	classes[index]=true;
 	            }
-	            System.out.println();
+	            //System.out.println();
 	        }
 			}
 
